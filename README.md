@@ -9,7 +9,7 @@ Check out this article for a detailed explanation on how to create your custom P
 Installation and updating
 Use the package manager pip to install Toolbox like below. Rerun this command to check for and install updates .
 
-pip install git+https://github.com/Muls/toolbox
+pip install git+https://github.com/Liamephraims/dash_validation_toolkit
 Usage
 Features:
 
