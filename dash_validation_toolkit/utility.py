@@ -4,6 +4,7 @@ class client:
         self.client = client
         self.regions = regions
         self.prod_databases = prod_databases
+        self.failures = dict()
 
 # creating utility function for easily creating the client set-up
 def set_up_client(client_str, regions_list, prod_databases_list):
