@@ -15,6 +15,24 @@ class node:
         self.failures = dict()
 # this structure would be helpful in passing warnings etc, along a directed graph format
 
+# Creating client object class for creating client objects for capturing warnings and errors
+class client:
+    def __init__(self, client, regions, prod_databases):
+        self.client = client
+        self.regions = regions
+        self.prod_databases = prod_databases
+
+# creating utility function for easily creating the client set-up
+def set_up_client(client_str, regions_list, prod_databases_list):
+    # Creating a client object for keeping track of client validation:
+    client_object = client(client=client_str, regions=regions_list, prod_databases=prod_databases_list)
+    clients_dict = dict()
+    clients_dict[client_str] = client_object
+    return clients_dict
+
+
+
+
 ## DEFINING STAGE ONE CHECK FUNCTIONS
 
 
@@ -832,3 +850,4 @@ def stage_3_driver(dash_to_base_query_dictionary, clients, cumulative_check_dict
                 clients[validation_client].failures[dashboard_table] = failed_table
                 clients[validation_client].failures[dashboard_table].failures["3.6." +  str(counter)] = "FAILURE: Check 3.6: - in-dashboard comparison logic check failed  - {}\n".format(dashboard_comparison_name)
     return clients
+
