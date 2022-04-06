@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name='dash_validation_toolkit',
-    version='0.0.2',
+    version='0.0.3',
     author='Liam Ephraims',
     author_email='liam.ephraims@bigpicturemedical.com',
     description='Use driver functions to run stage 1, 2 and 3 checks, can also run individual checks',
