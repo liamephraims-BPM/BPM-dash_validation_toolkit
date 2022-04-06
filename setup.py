@@ -8,7 +8,7 @@ setuptools.setup(
     version='0.0.3',
     author='Liam Ephraims',
     author_email='liam.ephraims@bigpicturemedical.com',
-    description='Use driver functions to run stage 1, 2 and 3 checks, can also run individual checks',
+    description='Use driver functions and utility functions to run stage 1, 2 and 3 checks, can also run individual checks',
     long_description=long_description,
     long_description_content_type="text/markdown",
     url='https://github.com/Liamephraims/dash_validation_toolkit',
