@@ -851,3 +851,15 @@ def stage_3_driver(dash_to_base_query_dictionary, clients, cumulative_check_dict
                 clients[validation_client].failures[dashboard_table].failures["3.6." +  str(counter)] = "FAILURE: Check 3.6: - in-dashboard comparison logic check failed  - {}\n".format(dashboard_comparison_name)
     return clients
 
+# Creating utility function for outputting all the client failures and warnings:
+def output_client_validation_results(clients):
+    for bpmclient in clients:
+        print("------------------------------------------------------------Beginning Failures Output for {}-----------------------------------------------------\n".format(bpmclient))
+        print("For client {}, the failures are:\n".format(bpmclient))
+        for failed_tables in clients[bpmclient].failures:
+            for failure in clients[bpmclient].failures[failed_tables].failures:
+                print(clients[bpmclient].failures[failed_tables].failures[failure])
+                for child in clients[bpmclient].failures[failed_tables].dependencies:
+                    print("WARNING: Check {} failed for {} - this may affect the downstream table {}\n".format(failure, failed_tables, child))
+        print("------------------------------------------------------------End of Failures output for {}-----------------------------------------------------\n\n".format(bpmclient))
+    # add code here to add weeks data to a validation table in athena
