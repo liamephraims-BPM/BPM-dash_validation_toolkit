@@ -4,7 +4,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name='dashboard_validation_toolkit',
+    name='dash_validation_toolkit',
     version='0.0.1',
     author='Liam Ephraims',
     author_email='liam.ephraims@bigpicturemedical.com',
@@ -13,6 +13,6 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url='https://github.com/big-picture-medical/analytics/tree/main/data_validation/',
     license='MIT',
-    packages=['dashboard_validation_toolkit'],
+    packages=['dash_validation_toolkit'],
     install_requires=['pyathena', 'pandas'] #, 
 )
