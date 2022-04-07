@@ -9,7 +9,7 @@ class client:
 # creating utility function for easily creating the client set-up
 def set_up_client(client_str, regions_list, prod_databases_list):
     # Creating a client object for keeping track of client validation:
-    client_object = client(client=client_str, regions=regions_list, prod_databases=prod_databases_list)
+    client_object = client(client_str, regions_list, prod_databases_list)
     clients_dict = dict()
     clients_dict[client_str] = client_object
     return clients_dict
