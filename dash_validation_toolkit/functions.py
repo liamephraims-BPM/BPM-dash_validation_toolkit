@@ -617,20 +617,6 @@ def stage_2_driver(primary_parents, clients, validation_client, definition_check
 
             check3 = check_2_3(table, clients[validation_client].client + "_base_tables", base_PK, connection)    
 
-            #################################### Check 2.4: Checking that defintion look-up tables are up-to-date ###########################################################   - NOTE: this will be done twice in loop, would be good to imrpove on this
-            # Checking if for this base table, if there is a definition/look-up table associated with it which needs to be checked
-
-            # setting check4 by default to be true (if there is no look-up table/definition to check for table)
-
-            check4 = True
-
-
-            if table in definition_check_dictionary: 
-                # unpacking variables for checking over definition in check 2.4
-                definition, look_up_database,look_up_table, look_up_column  =   definition_check_dictionary[table]
-		# run check4
-                check4 = check_2_4(definition, look_up_database, look_up_table, look_up_column, connection)
-
             # Adding failures from checks of stage 1:
             if check1 == False:
                 #Then Check 2.1 has failed for this base table - create a node (if not already created for this table) and add its failure
@@ -670,23 +656,37 @@ def stage_2_driver(primary_parents, clients, validation_client, definition_check
                     failed_table = node(table, clients[validation_client].client , clients[validation_client].client + "_base_tables", [] )
                     clients[validation_client].failures[table] = failed_table
                     clients[validation_client].failures[table].failures["2.3"] = "FAILURE: Check 2.3 - Table {}  - Primary key constraint broken - primary key duplicates \n".format(table )
-
-            if check4 == False:
-                #Then Check 2.4 has failed for this base table - create a node (if not already created for this table) and add its failure
-                # adding to this overall client object:
-
-                if table  in clients[validation_client].failures:
-                    #then already in clients[validation_client]  - add additional failure
-                    clients[validation_client].failures[table].failures["2.4"] = "WARNING: Check 2.4 - Table {} - new definition value missing from definition look-up table \n".format(table )
-                else:
-                    # then table has not failed a check, add to client object and add first failure:
-                    failed_table = node(table, clients[validation_client].client , clients[validation_client].client + "_base_tables", [] )
-                    clients[validation_client].failures[table] = failed_table
-                    clients[validation_client].failures[table].failures["2.4"] = "WARNING: Check 2.4 - Table {} - new definition value missing from definition look-up table \n".format(table )
-
         # If table has not been defined in primary_parents (no obvious union table), it will not be checked - caused by mismatch in key names
         else:
-            print(table, " has not been checked")
+            print(table, " has not been checked")    ############################ Check 2.4: Checking that defintion look-up tables are up-to-date ###########################################################   - NOTE: this will be done twice in loop, would be good to imrpove on this
+    # Checking if for this base table, if there is a definition/look-up table associated with it which needs to be checked
+
+    # setting check4 by default to be true (if there is no look-up table/definition to check for table)
+
+    check4 = True
+    
+    # checking if any definitions in check dictionary:
+    if len(definition_check_dictionary) > 0:
+	# then complete check for definition:
+    	for definition in definition_check_dictionary:
+	# unpacking variables for checking over definition in check 2.4
+                look_up_database,look_up_table, look_up_column  =   definition_check_dictionary[definition]
+		# run check4
+                check4 = check_2_4(definition, look_up_database, look_up_table, look_up_column, connection)
+                if check4 == False:
+			#Then Check 2.4 has failed for this definition - create a node (if not already created for this table) and add its failure
+			# adding to this overall client object:
+
+			if definition in clients[validation_client].failures:
+			    #then already in clients[validation_client]  - add additional failure
+			    clients[validation_client].failures[definition].failures["2.4"] = "WARNING: Check 2.4 - Definition {} - new definition value missing from definition look-up table \n".format(definition )
+			else:
+			    # then definition has not failed a check, add to client object and add first failure:
+			    failed_table = node(definition, clients[validation_client].client , clients[validation_client].client + "_base_tables", [] )
+			    clients[validation_client].failures[definition] = failed_table
+			    clients[validation_client].failures[definition].failures["2.4"] = "WARNING: Check 2.4 - Definition {} - new definition value missing from definition look-up table \n".format(definition )
+
+
     return clients
 
 
