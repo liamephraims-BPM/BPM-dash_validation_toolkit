@@ -627,7 +627,6 @@ def stage_2_driver(primary_parents, clients, validation_client, definition_check
 
             if table in definition_check_dictionary: 
                 # unpacking variables for checking over definition in check 2.4
-		check_2_4(definition, look_up_database, look_up_table, look_up_column, connection)
                 definition, look_up_database,look_up_table, look_up_column  =   definition_check_dictionary[table]
 		# run check4
                 check4 = check_2_4(definition, look_up_database, look_up_table, look_up_column, connection)
