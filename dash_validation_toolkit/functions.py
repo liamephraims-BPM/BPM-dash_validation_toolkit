@@ -243,45 +243,32 @@ def check_2_3(target, targetdbs, target_PK, connection):
 
 ######################### Check 2.4 definition - Check that for a base table which has a column which has an assumption based on a definition, that definition is up-to-date with all definition values - e.g. ecp roles   ############################################################################
 
-def check_2_4(look_up_database, look_up_table, look_up_column, prod_query, prod_column, exclusion_set, connection):
+def check_2_4(definition, look_up_database, look_up_table, look_up_column, connection):
         """ Utility function for check 2.4, checking that defintion look-up tables are up-to-date - ie no new values in prod which are not in exclusion set & in look-up table
                 Inputs:
+                    look-up definition = a string of the name of the defintion to be displayed on print out - e.g. ecp role definition
                     look_up_database = database name string for look up table - e.g. jj_sandbox
                     look_up_table = table name string for look-up table - e.g. ecp_user_roles_LOOK_UP
                     look_up_column = column name string of look-up table for value set being maintained - e.g. name
-                    prod_query = the athena query string for creating the look-up table dataset-
-                                e.g. SELECT DISTINCT name FROM jj_prod_union.roles
-                    prod_column = the column name for the look-up value set of interest- e.g. name for roles
-                    exclusion_set = the set of look-up values that have already been confirmed will not need to be added to look-up table 
+                    connection: the athena aws connection object
                 Output:
                     bool - True/False - 1/0
-                Comments: these look-up tables & exclusion criteria are likely out of date, probs need a better way to maintain these if we see the need to maintain              
         """
 
         # Getting the definition values for base look-up table:
         base_query = pd.read_sql("""
                                     SELECT DISTINCT {}
                                     FROM {}.{}
+                                    WHERE look_up_inclusion_flag IS NULL -- looking to see if any null look-up values
                                 """.format(look_up_column, look_up_database, look_up_table), connection)
 
         # Getting the set of distinct values of base look-up table:
         base_set = set(base_query[look_up_column])
 
-        # Getting the definition values for prod look-up table:
-        prod_query = pd.read_sql(prod_query, connection)
-
-        # Getting the set of distinct values of defintion values off prod:
-        prod_set = set(prod_query[prod_column])
-
-        # removing from the prod_set any definition values that have already been deemed needing exclusion
-        for definition_value in exclusion_set:
-            if definition_value in prod_set:
-                prod_set.remove(definition_value)
-
-        print("Check 2.4 (no missed look-up values): ", bool(prod_set == base_set), look_up_table, prod_set.difference(base_set))
+        print("Check 2.4 (no missed/uncategorised look-up values): ", len(base_set)==0, f'- current missing/uncategorised ({definition}) definition values for column ({look_up_column}) in database ({look_up_table}) are:',base_set)
 
         # Checking that after excluding all definition values that do not fit the definition, that there are no news one which have been missed from the base defintion look-up table
-        return prod_set == base_set
+        return len(base_set)==0
 
 
 ## DEFINING STAGE THREE FUNCTIONS:
@@ -640,11 +627,10 @@ def stage_2_driver(primary_parents, clients, validation_client, definition_check
 
             if table in definition_check_dictionary: 
                 # unpacking variables for checking over definition in check 2.4
-                bpmclient, look_up_table, look_up_database, look_up_column, definition_exclusion_set, prod_query, prod_column   =   definition_check_dictionary[table]
-                # making sure this base table <-> look up table is for the correct client:
-                if bpmclient == clients[validation_client].client:
-                    # run check for check 2.4:
-                    check4 = check_2_4(look_up_database, look_up_table, look_up_column, prod_query, prod_column, definition_exclusion_set, connection)
+		check_2_4(definition, look_up_database, look_up_table, look_up_column, connection)
+                definition, look_up_database,look_up_table, look_up_column  =   definition_check_dictionary[table]
+		# run check4
+                check4 = check_2_4(definition, look_up_database, look_up_table, look_up_column, connection)
 
             # Adding failures from checks of stage 1:
             if check1 == False:
