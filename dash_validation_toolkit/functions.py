@@ -669,22 +669,21 @@ def stage_2_driver(primary_parents, clients, validation_client, definition_check
     if len(definition_check_dictionary) > 0:
 	# then complete check for definition:
     	for definition in definition_check_dictionary:
-	# unpacking variables for checking over definition in check 2.4
-                look_up_database,look_up_table, look_up_column  =   definition_check_dictionary[definition]
-		# run check4
-                check4 = check_2_4(definition, look_up_database, look_up_table, look_up_column, connection)
-                if check4 == False:
+	        # unpacking variables for checking over definition in check 2.4
+            look_up_database,look_up_table, look_up_column  =   definition_check_dictionary[definition]
+		    # run check4
+            check4 = check_2_4(definition, look_up_database, look_up_table, look_up_column, connection)
+            if check4 == False:
 			#Then Check 2.4 has failed for this definition - create a node (if not already created for this table) and add its failure
 			# adding to this overall client object:
-
-			if definition in clients[validation_client].failures:
-			    #then already in clients[validation_client]  - add additional failure
-			    clients[validation_client].failures[definition].failures["2.4"] = "WARNING: Check 2.4 - Definition {} - new definition value missing from definition look-up table \n".format(definition )
-			else:
-			    # then definition has not failed a check, add to client object and add first failure:
-			    failed_table = node(definition, clients[validation_client].client , clients[validation_client].client + "_base_tables", [] )
-			    clients[validation_client].failures[definition] = failed_table
-			    clients[validation_client].failures[definition].failures["2.4"] = "WARNING: Check 2.4 - Definition {} - new definition value missing from definition look-up table \n".format(definition )
+                if definition in clients[validation_client].failures:
+                    #then already in clients[validation_client]  - add additional failure
+                    clients[validation_client].failures[definition].failures["2.4"] = "WARNING: Check 2.4 - Definition {} - new definition value missing from definition look-up table \n".format(definition )
+                else:
+                    # then definition has not failed a check, add to client object and add first failure:
+                    failed_table = node(definition, clients[validation_client].client , clients[validation_client].client + "_base_tables", [] )
+                    clients[validation_client].failures[definition] = failed_table
+                    clients[validation_client].failures[definition].failures["2.4"] = "WARNING: Check 2.4 - Definition {} - new definition value missing from definition look-up table \n".format(definition )
 
 
     return clients
