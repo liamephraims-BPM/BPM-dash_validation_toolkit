@@ -366,10 +366,10 @@ def check_3_3(cumulative_dash_query, base_dash_query, regions, cumulative_dash_s
     """ Utility function to test that for the cumulative table, if select all than this is equal the overall base statistic total - query should be by country summed   """
     
     # read in the cumulative data table from athena for all regions, maxing for last cumulative total for each regions + pathway
-    cumulative_dash_query = pd.read_sql(cumulative_dash_query, UK_athena_conn)
+    cumulative_dash_query = pd.read_sql(cumulative_dash_query, connection)
     
     # read in the base data table from athena for the overall count of the dash statistic over all regions
-    base_dash_read = pd.read_sql(base_dash_query, UK_athena_conn)
+    base_dash_read = pd.read_sql(base_dash_query, connection)
     
     # checking by country cumulative sum is equal to base stat
     cum_sum = cumulative_dash_query['count'][0]
