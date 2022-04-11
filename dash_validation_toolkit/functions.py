@@ -362,49 +362,24 @@ def check_3_2(dashboard_statistic, base_statistic_query, dash_table, dash_databa
     return (base_statistic==dash_statistic) and (check3_1 == True)
 
     ######################### Check 3.3 definition - Check 3 for stage 3 Dashboard checks - checking cumulative  statistics   ############################################################################
-# needs to generalise over numerous regions & numerous pathways
 def check_3_3(cumulative_dash_query, base_dash_query, regions, cumulative_dash_statistic, connection):
-    """ Utility function to test that for the cumulative table, if select all than this is equal the overall base statistic total    """
+    """ Utility function to test that for the cumulative table, if select all than this is equal the overall base statistic total - query should be by country summed   """
+    
     # read in the cumulative data table from athena for all regions, maxing for last cumulative total for each regions + pathway
-    cumulative_dash_query = pd.read_sql(cumulative_dash_query, connection)
-
+    cumulative_dash_query = pd.read_sql(cumulative_dash_query, UK_athena_conn)
+    
     # read in the base data table from athena for the overall count of the dash statistic over all regions
-    base_dash_read = pd.read_sql(base_dash_query, connection)
-
-    check_bool = 0
-
-    # integer for storing all regional select alls rolling counts:
-    select_all_regional_set = 0
-
-    if "pathway_name" in set(cumulative_dash_query.columns):
-
-        # getting all possible pathways for dash table stat
-        pathways = set(cumulative_dash_query["pathway_name"])
-
-        # completing select all comparison
-        if "Select all" in pathways:
-            for region in regions:
-                # then checking select all is correct against the base query for all pathways:
-                select_all_regional_set += list(cumulative_dash_query[(cumulative_dash_query["region"] == region) & (cumulative_dash_query["pathway_name"] == "Select all") ][cumulative_dash_statistic])[0]
-            # now checking that this total for select all over all regions is the same as the overall total from the base query:
-            if not select_all_regional_set == base_dash_read["count"][0]:
-                # if the select all cumulative total is not equal to the base query total for statistic, then add as a failure to the check bool
-                check_bool += 1
-        else:
-            if len(pathways) == 1:
-                #then only one pathway - check for this single pathway for all regions:
-                for pathway in pathways:
-                    for region in regions:
-                        # then checking select all is correct against the base query for all pathways:
-                        select_all_regional_set += list(cumulative_dash_query[(cumulative_dash_query["region"] == region) & (cumulative_dash_query["pathway_name"] == pathway) ][cumulative_dash_statistic])[0]
-                    # now checking that this total for select all over all regions is the same as the overall total from the base query:
-                    if not select_all_regional_set == base_dash_read["count"][0]:
-                        # if the select all cumulative total is not equal to the base query total for statistic, then add as a failure to the check bool
-                        check_bool += 1     
+    base_dash_read = pd.read_sql(base_dash_query, UK_athena_conn)
+    
+    # checking by country cumulative sum is equal to base stat
+    cum_sum = cumulative_dash_query['count'][0]
+    base_cnt = base_dash_read['count'][0]
+    
+    # checking result var
+    check_bool = bool(cum_sum != base_cnt)
 
     # completing check for 3.3, if any failures in pathway+region cumulative totals not adding up  or the overall select all not adding up to base query then inconsistency in cumualtive:
-    print("Check 3.3 (select all == cumulative total): ", check_bool == 0, cumulative_dash_statistic)
-    return check_bool == 0
+    print("Check 3.3 (select all == cumulative total): ", check_bool == 0,base_cnt, cum_sum, cumulative_dash_statistic)
     
 
     ######################### Check 3.4 definition - Check 3 for stage 3 Dashboard checks - checking onboard (single-level pathway)  statistics  -where sum would not work over multiple pathways ############################################################################
