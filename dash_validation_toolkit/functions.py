@@ -345,7 +345,7 @@ def check_3_2(dashboard_statistic, base_statistic_query, dash_table, dash_databa
             dash_statistic_query = dash_statistic_query + " WHERE pathway_name = 'Select all'"
 
             # furthermore, knowing that this is a multiple pathway, need to check that the pathways underlying the select all are also correct, so completeing a nested check for this
-            check3_1 = check_3_1(pathway_set, pathways, dashboard_statistic) 
+            check3_1 = check_3_1(pathway_set, pathways, dashboard_statistic, connection) 
 
     dash_statistic = pd.read_sql(dash_statistic_query, connection)
     dash_statistic = list(dash_statistic["_col0"])[0]
