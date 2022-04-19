@@ -230,12 +230,12 @@ def check_2_3(target, targetdbs, target_PK, connection):
 
     # check if there are any primary keys within this table - indicating duplicate primary keys - count > 1 so length of column turned to set > 0
     base_set = set(base_query["PK_base"])   
-
+    base_list = list(base_query["PK_base"])
     dup_keys = len(base_set)
     print("Check 2.3 (unique PKs): ",dup_keys ==0, target, dup_keys)
     
     # return whether this test is true - passed - or false - failed for not containing any duplicate primary keys/primary keys are unique
-    return dup_keys ==0, f"{dup_keys ==0} {target} {dup_keys} {target_PK} {targetdbs} { len(list(base_query["PK_base"])) }"
+    return dup_keys ==0, f"{dup_keys ==0} {target} {dup_keys} {target_PK} {targetdbs} { len(base_list) }"
 
 #check_dictionary["2.3"] = check_2_3
 
