@@ -738,12 +738,12 @@ def stage_3_driver(dash_to_base_query_dictionary, clients, cumulative_check_dict
 
             if dashboard_table  in clients[validation_client].failures:
             #then already in clients  - add additional failure
-                clients[validation_client].failures[dashboard_table].failures["3.3." +  str(counter)] = "FAILURE: Check 3.3 - Dashboard Table {}: - Dashboard cumulative statistic {} sum is inconsistent with derived base table statistic sum \n".format(dashboard_table, cumulative_statistic, check3[1] )
+                clients[validation_client].failures[dashboard_table].failures["3.3." +  str(counter)] = "FAILURE: Check 3.3 - Dashboard Table {}: - Dashboard cumulative statistic {} sum is inconsistent with derived base table statistic sum - values: {}\n".format(dashboard_table, cumulative_statistic, check3[1] )
             else:
                 # then dashboard_table has not failed a check, add to client object and add first failure:
                 failed_table = node(dashboard_table, clients[validation_client].client , clients[validation_client].client + "_dashboard_tables", [] )
                 clients[validation_client].failures[dashboard_table] = failed_table
-                clients[validation_client].failures[dashboard_table].failures["3.3." + str(counter)] = "FAILURE: Check 3.3 - Dashboard Table {}: - Dashboard cumulative statistic {} sum is inconsistent with derived base table statistic sum \n".format(dashboard_table, cumulative_statistic, check3[1] )
+                clients[validation_client].failures[dashboard_table].failures["3.3." + str(counter)] = "FAILURE: Check 3.3 - Dashboard Table {}: - Dashboard cumulative statistic {} sum is inconsistent with derived base table statistic sum - values: {}\n".format(dashboard_table, cumulative_statistic, check3[1] )
 
     counter = 0
     # evaluating dashboard statistic check for onboard stat (stat where each level should be the same):
