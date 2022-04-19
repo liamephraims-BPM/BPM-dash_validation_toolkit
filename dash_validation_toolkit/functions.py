@@ -54,7 +54,7 @@ def check_1_1(source, target, sourcedbs, targetdbs, region, connection):
 
     print("Check 1.1 (same regional row count): ", union_count== region_count, union_count, target, targetdbs, region_count, source, sourcedbs)
     # Check to see if count is the same for that regional prod table within the union table for that region
-    return union_count== region_count
+    return union_count== region_count, f"{union_count== region_count} {union_count} {target} {targetdbs} {region_count} {source} {sourcedbs}"
 
 
 
@@ -82,7 +82,7 @@ def check_1_2(target, targetdbs, connection):
 
     print("Check 1.2 (null regions): ", union_count== 0, union_count)
     # there should be no nulls in region column for union table
-    return union_count== 0
+    return union_count== 0, f"{ union_count== 0} {union_count} {target} {targetdbs}"
 
 
 
@@ -141,7 +141,7 @@ def check_2_1(target, targetdbs, target_PK, parent_query, prod_ids, connection):
 
     print("Check 2.1 (same PK count): ", parent_count== base_count, target, parent_count, base_count)
     # check result
-    return parent_count== base_count
+    return parent_count== base_count, f"{parent_count== base_count} {target} {parent_count} {base_count}"
 
 #check_dictionary["2.1"] = check_2_1
 
@@ -194,9 +194,9 @@ def check_2_2(target,targetdbs, target_PK, parent_query, prod_ids, connection):
     # actual count for union source table
     union_set = set(parent_query["union_PK"]) 
     
-    print("Check 2.2 (same distinct PKs): ", (len(union_set.intersection(base_set)) == len(union_set)) and (len(base_set.intersection(union_set)) == len(base_set)), target,   )
+    print("Check 2.2 (same distinct PKs): ", (len(union_set.intersection(base_set)) == len(union_set)) and (len(base_set.intersection(union_set)) == len(base_set)), target,  targetdbs )
     # check result: Logic - the intersection between base primary keys and union primary keys are the same - i.e. same primary keys in both base & union
-    return (len(union_set.intersection(base_set)) == len(union_set)) and (len(base_set.intersection(union_set)) == len(base_set))  
+    return (len(union_set.intersection(base_set)) == len(union_set)) and (len(base_set.intersection(union_set)) == len(base_set)), f"{(len(union_set.intersection(base_set)) == len(union_set)) and (len(base_set.intersection(union_set)) == len(base_set))} {target} {targetdbs}"  
 
 #check_dictionary["2.2"] = check_2_2
 
@@ -236,7 +236,7 @@ def check_2_3(target, targetdbs, target_PK, connection):
     print("Check 2.3 (unique PKs): ",dup_keys ==0, target, dup_keys)
     
     # return whether this test is true - passed - or false - failed for not containing any duplicate primary keys/primary keys are unique
-    return dup_keys ==0
+    return dup_keys ==0, f"{dup_keys ==0} {target} {dup_keys} {target_PK} {targetdbs}"
 
 #check_dictionary["2.3"] = check_2_3
 
@@ -268,7 +268,7 @@ def check_2_4(definition, look_up_database, look_up_table, look_up_column, conne
         print("Check 2.4 (no missed/uncategorised look-up values): ", len(base_set)==0, f'- current missing/uncategorised ({definition}) definition values for column ({look_up_column}) in database ({look_up_table}) are:',base_set)
 
         # Checking that after excluding all definition values that do not fit the definition, that there are no news one which have been missed from the base defintion look-up table
-        return len(base_set)==0
+        return len(base_set)==0, f"{len(base_set)==0} - current missing/uncategorised ({definition}) definition values for column ({look_up_column}) in database ({look_up_table}) are: {base_set}"
 
 
 ## DEFINING STAGE THREE FUNCTIONS:
@@ -296,7 +296,7 @@ def check_3_1(pathway_set, pathways, dashboard_stat, connection):
     # confirming that select all == (all pathway sums added together)
     print('Check 3.1 (select all == pathway sum):', select_all_total == pathway_total, dashboard_stat)
     
-    return select_all_total == pathway_total
+    return select_all_total == pathway_total, f"{select_all_total == pathway_total} {dashboard_stat}"
 
 
 ######################### Check 3.2 definition - Check 2 for stage 3 Dashboard checks - checking NON-cumulative & NON-onboard user dashboard statistics & check 3.1  ############################################################################
@@ -359,7 +359,7 @@ def check_3_2(dashboard_statistic, base_statistic_query, dash_table, dash_databa
 
     # check that the base statistic query is equal to the sumed base dashboard statistic (check 3.2) 
     #    AND if is a multiple pathway that select all == sum of individual pathways in dashboard table alone (check 3.1)
-    return (base_statistic==dash_statistic) and (check3_1 == True)
+    return (base_statistic==dash_statistic) and (check3_1 == True), f"{base_statistic==dash_statistic} {base_statistic,dash_statistic} {dash_table} {dashboard_statistic}"
 
     ######################### Check 3.3 definition - Check 3 for stage 3 Dashboard checks - checking cumulative  statistics   ############################################################################
 def check_3_3(cumulative_dash_query, base_dash_query, regions, cumulative_dash_statistic, connection):
@@ -380,6 +380,9 @@ def check_3_3(cumulative_dash_query, base_dash_query, regions, cumulative_dash_s
 
     # completing check for 3.3, if any failures in pathway+region cumulative totals not adding up  or the overall select all not adding up to base query then inconsistency in cumualtive:
     print("Check 3.3 (select all == cumulative total): ", check_bool == 0,base_cnt, cum_sum, cumulative_dash_statistic)
+	
+    return check_bool, f"{check_bool == 0} {base_cnt} {cum_sum} {cumulative_dash_statistic}"
+    
     
 
     ######################### Check 3.4 definition - Check 3 for stage 3 Dashboard checks - checking onboard (single-level pathway)  statistics  -where sum would not work over multiple pathways ############################################################################
@@ -418,7 +421,7 @@ def check_3_4(dashboard_statistic, dash_database, dash_table, base_statistic_que
     print("Check 3.4 (onboard stat dash->base same): ", (base_statistic == random_pathway_count and paths_equal_bool == True), dashboard_statistic)
     
     # Now having confirmed that all pathway counts are the same for this statistic, making sure that one of them is equal to the base table query for this statistic
-    return base_statistic == random_pathway_count and paths_equal_bool == True
+    return base_statistic == random_pathway_count and paths_equal_bool == True, f"{base_statistic == random_pathway_count and paths_equal_bool == True} {dashboard_statistic}"
 
     ######################### Check 3.5 definition - Check 3 for stage 3 Dashboard checks - checking onboard (single-level pathway)  statistics  -where sum would not work over multiple pathways ############################################################################
 
@@ -438,7 +441,7 @@ def check_3_5(business_logic_query, base_stat_query,business_logic_name, connect
     print(f"Check 3.5 (business logic-{business_logic_name}): ", (base_stat_query_result == business_logic_query_result), base_stat_query_result, business_logic_query_result)
 
     # returning whether business logic check was passed:
-    return base_stat_query_result == business_logic_query_result
+    return base_stat_query_result == business_logic_query_result, f"business logic-{business_logic_name}: {base_stat_query_result == business_logic_query_result} {base_stat_query_result} {business_logic_query_result}"
 
     ######################### Check 3.6 definition - essentially same as above - Check 3 for stage 3 Dashboard checks - Checking between dashboard figures or business logic totals within the dashboard
 
@@ -458,7 +461,7 @@ def check_3_6(dash_query_1, dash_query_2,dash_test_name, logical_comparion_opera
     # outputting result of comparison
     print(f"Check 3.6 (within-dash check-{dash_test_name}): ", eval("{} {} {}".format(dash1_query_result, logical_comparion_operator,dash2_query_result)), dash2_query_result, dash1_query_result)
     # returning whether dash comparison check was passed: NOTE: this will evaluate the string as a logical expression - allowing for the logic operator to be dynamic
-    return eval("{} {} {}".format(dash1_query_result, logical_comparion_operator,dash2_query_result))
+    return eval("{} {} {}".format(dash1_query_result, logical_comparion_operator,dash2_query_result)), f"{eval("{} {} {}".format(dash1_query_result, logical_comparion_operator,dash2_query_result))} {dash1_query_result} {logical_comparion_operator} {dash2_query_result}"
 
 
 ## DEFINING DRIVER FUNCTIONS - STAGE ONE
@@ -502,36 +505,36 @@ def stage_1_driver(clients, validation_client, connection):
             check1 = check_1_1(source=table,target=table,sourcedbs=prod_database, targetdbs=clients[validation_client].client + "_prod_union", region=region, connection=connection)
 
                     # Adding failures from checks of stage 1 to client object:
-            if check1 == False:
+            if check1[0] == False:
                 #Then Check 1.1 has failed for this union table - create a node (if not already created for this table) and add its failure
                 # adding to this overall client object:
 
                 if table  in clients[validation_client].failures:
                     #then already in jj  - add additional failure
-                    clients[validation_client].failures[table].failures["1.1"] = "FAILURE: Check 1.1 - Table {} for region: {} - Inconsistent region count between region production & union\n".format(table, region )
+                    clients[validation_client].failures[table].failures["1.1"] = "FAILURE: Check 1.1 - Table {} for region: {} - Inconsistent region count between region production & union - values: {}\n".format(table, region, check1[1])
                 else:
                     # then table has not failed a check, add to client object and add first failure:
                     failed_table = node(table, clients[validation_client].client , clients[validation_client].client + "_prod_union", [] )
                     clients[validation_client].failures[table] = failed_table
-                    clients[validation_client].failures[table].failures["1.1"] = "FAILURE: Check 1.1 - Table {} for region: {} - Inconsistent region count between region production & union\n".format(table, region )
+                    clients[validation_client].failures[table].failures["1.1"] = "FAILURE: Check 1.1 - Table {} for region: {} - Inconsistent region count between region production & union - values: {}\n".format(table, region, check1[1])
 
 
             #################################### Check 1.2: Check that there are no NULLS in region column of union table ###########################################################   
             # This will only be run once per table (is outside of the region loop)
             check2 = check_1_2(target=table, targetdbs=clients[validation_client].client + "_prod_union", connection=connection)
 
-            if check2 == False:
+            if check2[0] == False:
                 #Then Check 1.2 has failed for this union table - create a node (if not already created for this table) and add its failure
                 # adding to this overall client object:
 
                 if table  in clients[validation_client].failures:
                     #then already in clients[validation_client]  - add additional failure
-                    clients[validation_client].failures[table].failures["1.2"] = "FAILURE: Check 1.2 - Table {}: has null region values for region column in union table\n".format(table)
+                    clients[validation_client].failures[table].failures["1.2"] = "FAILURE: Check 1.2 - Table {}: has null region values for region column in union table- values: {}\n".format(table, check2[0])
                 else:
                     # then table has not failed a check, add to client object and add first failure:
                     failed_table = node(table, clients[validation_client].client , clients[validation_client].client + "_prod_union", [] )
                     clients[validation_client].failures[table] = failed_table
-                    clients[validation_client].failures[table].failures["1.2"] = "FAILURE: Check 1.2 - Table {}: has null region values for region column in union table\n".format(table)
+                    clients[validation_client].failures[table].failures["1.2"] = "FAILURE: Check 1.2 - Table {}: has null region values for region column in union table - values: {}\n".format(table, check2[0])
     return clients
 
 def stage_2_driver(primary_parents, clients, validation_client, definition_check_dictionary, connection):
@@ -593,47 +596,57 @@ def stage_2_driver(primary_parents, clients, validation_client, definition_check
             check3 = check_2_3(table, clients[validation_client].client + "_base_tables", base_PK, connection)    
 
             # Adding failures from checks of stage 1:
-            if check1 == False:
+            if check1[0] == False:
                 #Then Check 2.1 has failed for this base table - create a node (if not already created for this table) and add its failure
                 # adding to this overall client object:
 
                 if table  in clients[validation_client].failures:
                     #then already in clients - add additional failure
-                    clients[validation_client].failures[table].failures["2.1"] = "FAILURE: Check 2.1 - Table {} - Inconsistent Primary key count between base & union tables\n".format(table)
+                    clients[validation_client].failures[table].failures["2.1"] = "FAILURE: Check 2.1 - Table {} - Inconsistent Primary key count between base & union tables - values: {} \n".format(table, check1[1])
                 else:
                     # then table has not failed a check, add to client object and add first failure:
                     failed_table = node(table, clients[validation_client].client , clients[validation_client].client + "_base_tables", [])
                     clients[validation_client].failures[table] = failed_table
-                    clients[validation_client].failures[table].failures["2.1"] = "FAILURE: Check 2.1 - Table {} - Inconsistent Primary key count between base & union tables\n".format(table)
+                    clients[validation_client].failures[table].failures["2.1"] = "FAILURE: Check 2.1 - Table {} - Inconsistent Primary key count between base & union tables - values: {} \n".format(table, check1[1])
 
-            if check2 == False:
+            if check2[0] == False:
                 #Then Check 2.2 has failed for this base table - create a node (if not already created for this table) and add its failure
                 # adding to this overall client object:
 
                 if table  in clients[validation_client].failures:
                     #then already in clients[validation_client]  - add additional failure
-                    clients[validation_client].failures[table].failures["2.2"] = "FAILURE: Check 2.2 - Table {} - Inconsistent or missing primary keys between base & union tables\n".format(table)
+                    clients[validation_client].failures[table].failures["2.2"] = "FAILURE: Check 2.2 - Table {} - Inconsistent or missing primary keys between base & union tables - values: {} \n".format(table, check2[1])
                 else:
                     # then table has not failed a check, add to client object and add first failure:
                     failed_table = node(table, clients[validation_client].client , clients[validation_client].client + "_base_tables", [] )
                     clients[validation_client].failures[table] = failed_table
-                    clients[validation_client].failures[table].failures["2.2"] = "FAILURE: Check 2.2 - Table {} - Inconsistent or missing primary keys between base & union tables\n".format(table )
+                    clients[validation_client].failures[table].failures["2.2"] = "FAILURE: Check 2.2 - Table {} - Inconsistent or missing primary keys between base & union tables - values: {} \n".format(table, check2[1] )
 
-            if check3 == False:
+            if check3[0] == False:
                 #Then Check 2.3 has failed for this base table - create a node (if not already created for this table) and add its failure
                 # adding to this overall client object:
 
                 if table  in clients[validation_client].failures:
                     #then already in clients[validation_client]  - add additional failure
-                    clients[validation_client].failures[table].failures["2.3"] = "FAILURE: Check 2.3 - Table {} - Primary key constraint broken - primary key duplicates \n".format(table )
+                    clients[validation_client].failures[table].failures["2.3"] = "FAILURE: Check 2.3 - Table {} - Primary key constraint broken - primary key duplicates - values: {} \n".format(table, check3[1])
                 else:
                     # then table has not failed a check, add to client object and add first failure:
                     failed_table = node(table, clients[validation_client].client , clients[validation_client].client + "_base_tables", [] )
                     clients[validation_client].failures[table] = failed_table
-                    clients[validation_client].failures[table].failures["2.3"] = "FAILURE: Check 2.3 - Table {}  - Primary key constraint broken - primary key duplicates \n".format(table )
+                    clients[validation_client].failures[table].failures["2.3"] = "FAILURE: Check 2.3 - Table {}  - Primary key constraint broken - primary key duplicates - values: {}\n".format(table, check3[1])
         # If table has not been defined in primary_parents (no obvious union table), it will not be checked - caused by mismatch in key names
         else:
-            print(table, " has not been checked")    ############################ Check 2.4: Checking that defintion look-up tables are up-to-date ###########################################################   - NOTE: this will be done twice in loop, would be good to imrpove on this
+              if table  in clients[validation_client].failures:
+                    #then already in clients[validation_client]  - add additional failure
+                    clients[validation_client].failures[table].failures["2.3"] = "WARNING: Check 2.1, 2.2, 2.3 - Table {} has not been checked"\n".format(table)
+              else:
+                    # then table has not failed a check, add to client object and add first failure:
+                    failed_table = node(table, clients[validation_client].client , clients[validation_client].client + "_base_tables", [] )
+                    clients[validation_client].failures[table] = failed_table
+                    clients[validation_client].failures[table].failures["2.3"] = "WARNING: Check 2.1, 2.2, 2.3 - Table {} has not been checked for stage two checks"\n".format(table)
+	
+	      print(table, " has not been checked")    
+############################ Check 2.4: Checking that defintion look-up tables are up-to-date ###########################################################   - NOTE: this will be done twice in loop, would be good to imrpove on this
     # Checking if for this base table, if there is a definition/look-up table associated with it which needs to be checked
 
     # setting check4 by default to be true (if there is no look-up table/definition to check for table)
@@ -648,17 +661,17 @@ def stage_2_driver(primary_parents, clients, validation_client, definition_check
             look_up_database,look_up_table, look_up_column  =   definition_check_dictionary[definition]
 		    # run check4
             check4 = check_2_4(definition, look_up_database, look_up_table, look_up_column, connection)
-            if check4 == False:
+            if check4[0] == False:
 			#Then Check 2.4 has failed for this definition - create a node (if not already created for this table) and add its failure
 			# adding to this overall client object:
                 if definition in clients[validation_client].failures:
                     #then already in clients[validation_client]  - add additional failure
-                    clients[validation_client].failures[definition].failures["2.4"] = "WARNING: Check 2.4 - Definition {} - new definition value missing from definition look-up table \n".format(definition )
+                    clients[validation_client].failures[definition].failures["2.4"] = "WARNING: Check 2.4 - Definition {} - new definition value missing from definition look-up table - values: {}\n".format(definition, check4[1])
                 else:
                     # then definition has not failed a check, add to client object and add first failure:
                     failed_table = node(definition, clients[validation_client].client , clients[validation_client].client + "_base_tables", [] )
                     clients[validation_client].failures[definition] = failed_table
-                    clients[validation_client].failures[definition].failures["2.4"] = "WARNING: Check 2.4 - Definition {} - new definition value missing from definition look-up table \n".format(definition )
+                    clients[validation_client].failures[definition].failures["2.4"] = "WARNING: Check 2.4 - Definition {} - new definition value missing from definition look-up table - values {} \n".format(definition, check4[1])
 
 
     return clients
@@ -691,7 +704,7 @@ def stage_3_driver(dash_to_base_query_dictionary, clients, cumulative_check_dict
         check1 = check_3_2(dashboard_statistic=statistic, base_statistic_query=dash_to_base_query_dictionary[statistic][1], dash_table=dashboard_table, dash_database=clients[validation_client].client + "_dashboard_tables", connection=connection)
 
         # Adding failures from checks of stage 1 to client object:
-        if check1 == False:
+        if check1[0] == False:
 
 
         #Then Check 3.2 has failed for this union table - create a node (if not already created for this table) and add its failure
@@ -699,12 +712,12 @@ def stage_3_driver(dash_to_base_query_dictionary, clients, cumulative_check_dict
 
             if dashboard_table  in clients[validation_client].failures:
             #then already in clients  - add additional failure
-                clients[validation_client].failures[dashboard_table].failures["3.1." + str(counter)] = "FAILURE: Check 3.1 - Dashboard Table {}: - Dashboard statistic {} sum is inconsistent with derived base table statistic sum \n".format(dashboard_table, statistic )
+                clients[validation_client].failures[dashboard_table].failures["3.1." + str(counter)] = "FAILURE: Check 3.1 - Dashboard Table {}: - Dashboard statistic {} sum is inconsistent with derived base table statistic sum - values: {} \n".format(dashboard_table, statistic, check1[1])
             else:
                 # then dashboard_table has not failed a check, add to client object and add first failure:
                 failed_table = node(dashboard_table, clients[validation_client].client , clients[validation_client].client + "_dashboard_tables", [] )
                 clients[validation_client].failures[dashboard_table] = failed_table
-                clients[validation_client].failures[dashboard_table].failures["3.1." +  str(counter)] = "FAILURE: Check 3.1 - Dashboard Table {}: - Dashboard statistic {} sum is inconsistent with derived base table statistic sum \n".format(dashboard_table, statistic )
+                clients[validation_client].failures[dashboard_table].failures["3.1." +  str(counter)] = "FAILURE: Check 3.1 - Dashboard Table {}: - Dashboard statistic {} sum is inconsistent with derived base table statistic sum - values: {} \n".format(dashboard_table, statistic, check1[1])
 
     counter = 0
     # For each cumulative statistic in dashboard:
@@ -718,19 +731,19 @@ def stage_3_driver(dash_to_base_query_dictionary, clients, cumulative_check_dict
         check3 = check_3_3(cumulative_dash_query, base_dash_query, clients[validation_client].regions, cumulative_statistic, connection=connection)
 
         # Adding failures from checks of stage 1 to client object:
-        if check3 == False:
+        if check3[0] == False:
 
         #Then Check 1.1 has failed for this union table - create a node (if not already created for this table) and add its failure
         # adding to this overall client object:
 
             if dashboard_table  in clients[validation_client].failures:
             #then already in clients  - add additional failure
-                clients[validation_client].failures[dashboard_table].failures["3.3." +  str(counter)] = "FAILURE: Check 3.3 - Dashboard Table {}: - Dashboard cumulative statistic {} sum is inconsistent with derived base table statistic sum \n".format(dashboard_table, cumulative_statistic )
+                clients[validation_client].failures[dashboard_table].failures["3.3." +  str(counter)] = "FAILURE: Check 3.3 - Dashboard Table {}: - Dashboard cumulative statistic {} sum is inconsistent with derived base table statistic sum \n".format(dashboard_table, cumulative_statistic, check3[1] )
             else:
                 # then dashboard_table has not failed a check, add to client object and add first failure:
                 failed_table = node(dashboard_table, clients[validation_client].client , clients[validation_client].client + "_dashboard_tables", [] )
                 clients[validation_client].failures[dashboard_table] = failed_table
-                clients[validation_client].failures[dashboard_table].failures["3.3." + str(counter)] = "FAILURE: Check 3.3 - Dashboard Table {}: - Dashboard cumulative statistic {} sum is inconsistent with derived base table statistic sum \n".format(dashboard_table, cumulative_statistic )
+                clients[validation_client].failures[dashboard_table].failures["3.3." + str(counter)] = "FAILURE: Check 3.3 - Dashboard Table {}: - Dashboard cumulative statistic {} sum is inconsistent with derived base table statistic sum \n".format(dashboard_table, cumulative_statistic, check3[1] )
 
     counter = 0
     # evaluating dashboard statistic check for onboard stat (stat where each level should be the same):
@@ -739,19 +752,19 @@ def stage_3_driver(dash_to_base_query_dictionary, clients, cumulative_check_dict
         check4 = check_3_4(onboard_statistic, clients[validation_client].client + "_dashboard_tables", "overview_weekly", onboard_stat_dict[onboard_statistic], connection)
 
         # Adding failures from checks of stage 3 to client object:
-        if check4 == False:
+        if check4[0] == False:
 
         #Then Check 3.4 has failed for this union table - create a node (if not already created for this table) and add its failure
         # adding to this overall client object:
 
             if dashboard_table  in clients[validation_client].failures:
             #then already in clients  - add additional failure
-                clients[validation_client].failures[dashboard_table].failures["3.4." +  str(counter)] = "FAILURE: Check 3.4 - Dashboard Table {}: - Dashboard onboard statistic {}  is inconsistent across levels with derived base table statistic sum \n".format(dashboard_table, cumulative_statistic )
+                clients[validation_client].failures[dashboard_table].failures["3.4." +  str(counter)] = "FAILURE: Check 3.4 - Dashboard Table {}: - Dashboard onboard statistic {}  is inconsistent across levels with derived base table statistic sum - values: {}\n".format(dashboard_table, cumulative_statistic, check4[1] )
             else:
                 # then dashboard_table has not failed a check, add to client object and add first failure:
                 failed_table = node(dashboard_table, clients[validation_client].client , clients[validation_client].client + "_dashboard_tables", [] )
                 clients[validation_client].failures[dashboard_table] = failed_table
-                clients[validation_client].failures[dashboard_table].failures["3.4." +  str(counter)] = "FAILURE: Check 3.4 - Dashboard Table {}: - Dashboard onboard statistic {}  is inconsistent across levels with derived base table statistic sum \n".format(dashboard_table, cumulative_statistic )
+                clients[validation_client].failures[dashboard_table].failures["3.4." +  str(counter)] = "FAILURE: Check 3.4 - Dashboard Table {}: - Dashboard onboard statistic {}  is inconsistent across levels with derived base table statistic sum - values: {}\n".format(dashboard_table, cumulative_statistic, check4[1] )
 
     counter = 0
     # For each business logic check for dashboard:
@@ -762,15 +775,15 @@ def stage_3_driver(dash_to_base_query_dictionary, clients, cumulative_check_dict
         #################################### Check 3.5: Check business logic queries against base tables for dashboard ###########################################################
         check5 = check_3_5(business_logic_query, base_stat_query,business_logic_name, connection)
 
-        if check5 == False:
+        if check5[0] == False:
             if dashboard_table  in clients[validation_client].failures:
             #then already in clients  - add additional failure
-                clients[validation_client].failures[dashboard_table].failures["3.5." +  str(counter)] = "FAILURE: Check 3.5 - Dashboard Table {}: - business logic check failed - {}\n".format(dashboard_table,  business_logic_name)
+                clients[validation_client].failures[dashboard_table].failures["3.5." +  str(counter)] = "FAILURE: Check 3.5 - Dashboard Table {}: - business logic check failed - {} - values: {} \n".format(dashboard_table,  business_logic_name, check5[1])
             else:
                  # then dashboard_table has not failed a check, add to client object and add first failure:
                 failed_table = node(dashboard_table, clients[validation_client].client , clients[validation_client].client + "_dashboard_tables", [] )
                 clients[validation_client].failures[dashboard_table] = failed_table
-                clients[validation_client].failures[dashboard_table].failures["3.5." +  str(counter)] = "FAILURE: Check 3.5 - Dashboard Table {}: - business logic check failed - {}\n".format(dashboard_table,  business_logic_name)
+                clients[validation_client].failures[dashboard_table].failures["3.5." +  str(counter)] = "FAILURE: Check 3.5 - Dashboard Table {}: - business logic check failed - {} - values: {} \n".format(dashboard_table,  business_logic_name, check5[1])
 
     counter = 0
     ## For each in-dashboard comparison:
@@ -781,14 +794,14 @@ def stage_3_driver(dash_to_base_query_dictionary, clients, cumulative_check_dict
 
     #     #################################### Check 3.6: Check in-dashboard comparions logic ###########################################################
         check6 = check_3_6(dash_query_1, dash_query_2,dashboard_comparison_name, logical_operator, connection)
-        if check6 == False:
+        if check6[0] == False:
             if dashboard_table  in clients[validation_client].failures:
             #then already in clients  - add additional failure
-                clients[validation_client].failures[dashboard_table].failures["3.6." +  str(counter)] = "FAILURE: Check 3.6: - in-dashboard comparison logic check failed - {}\n".format(dashboard_comparison_name)
+                clients[validation_client].failures[dashboard_table].failures["3.6." +  str(counter)] = "FAILURE: Check 3.6: - in-dashboard comparison logic check failed - {} - values: {}\n".format(dashboard_comparison_name, check6[1])
             else:
                 # then dashboard_table has not failed a check, add to client object and add first failure:
                 failed_table = node(dashboard_table, clients[validation_client].client , clients[validation_client].client + "_dashboard_tables", [] )
                 clients[validation_client].failures[dashboard_table] = failed_table
-                clients[validation_client].failures[dashboard_table].failures["3.6." +  str(counter)] = "FAILURE: Check 3.6: - in-dashboard comparison logic check failed  - {}\n".format(dashboard_comparison_name)
+                clients[validation_client].failures[dashboard_table].failures["3.6." +  str(counter)] = "FAILURE: Check 3.6: - in-dashboard comparison logic check failed  - {} - values: {}\n".format(dashboard_comparison_name, check6[1])
     return clients
 
