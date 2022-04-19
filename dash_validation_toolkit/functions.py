@@ -295,7 +295,7 @@ def check_3_1(pathway_set, pathways, dashboard_stat, connection):
     # confirming that select all == (all pathway sums added together)
     print('Check 3.1 (select all == pathway sum):', select_all_total == pathway_total, dashboard_stat, select_all_total,  pathway_total)
     
-    return select_all_total == pathway_total, f"{select_all_total == pathway_total} {dashboard_stat} {select_all_total} {pathway_total}"
+    return select_all_total == pathway_total
 
 
 ######################### Check 3.2 definition - Check 2 for stage 3 Dashboard checks - checking NON-cumulative & NON-onboard user dashboard statistics & check 3.1  ############################################################################
@@ -358,7 +358,7 @@ def check_3_2(dashboard_statistic, base_statistic_query, dash_table, dash_databa
 
     # check that the base statistic query is equal to the sumed base dashboard statistic (check 3.2) 
     #    AND if is a multiple pathway that select all == sum of individual pathways in dashboard table alone (check 3.1)
-    return (base_statistic==dash_statistic) and (check3_1[0] == True), f"{base_statistic==dash_statistic} {base_statistic,dash_statistic} {dash_table} {dashboard_statistic}"
+    return (base_statistic==dash_statistic) and (check3_1 == True), f"{base_statistic==dash_statistic} {base_statistic,dash_statistic} {dash_table} {dashboard_statistic}"
 
     ######################### Check 3.3 definition - Check 3 for stage 3 Dashboard checks - checking cumulative  statistics   ############################################################################
 def check_3_3(cumulative_dash_query, base_dash_query, regions, cumulative_dash_statistic, connection):
