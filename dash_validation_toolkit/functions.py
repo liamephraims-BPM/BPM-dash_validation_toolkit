@@ -110,7 +110,7 @@ def check_2_1(target, targetdbs, target_PK, parent_query, prod_ids, connection):
     # will return true so does not appear in errors/warnings.
     if parent_query == []:
         print(f"Check 2.1 skipped for {target}--not appropriate")
-        return True
+        return True, f"Check 2.1 skipped for {target}--not appropriate"
         
     # check if PK is a composite PK so a list, if so need to concat into correct format- otherwise leave as single column string:
     if type(target_PK) == list:
@@ -166,7 +166,7 @@ def check_2_2(target,targetdbs, target_PK, parent_query, prod_ids, connection):
     # will return true so does not appear in errors/warnings.
     if parent_query == []:
         print(f"Check 2.2 skipped for {target}-not appropriate")
-        return True
+        return True, f"Check 2.2 skipped for {target}-not appropriate"
 
         # check if PK is a composite PK so a list, if so need to concat into correct format- otherwise leave as single column string:
     if type(target_PK) == list:
