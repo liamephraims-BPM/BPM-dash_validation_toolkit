@@ -18,15 +18,15 @@ def set_up_client(client_str, regions_list, prod_databases_list):
 import requests
 import json
 #send data to webhook
-def send_data(text):
-    WEBHOOK = "https://hooks.slack.com/services/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"
+def send_data(text, slack_webhook):
+    WEBHOOK = slack_webhook
     data = {"text":text}
     headers = {'content-type': 'application/json'}
     res = requests.post(WEBHOOK, data=json.dumps(data), headers=headers)
     print(res.text)
     
 # Creating utility function for outputting all the client failures and warnings:
-def output_client_validation_results(clients, send_to_slack=True):
+def output_client_validation_results(clients, send_to_slack=True, slack_webhook):
     """
         Print out the warnings/errors from the validation, and if send to slack parameter is not false, then also send to analytics slack channel
     """
@@ -45,6 +45,6 @@ def output_client_validation_results(clients, send_to_slack=True):
         # first print out
         print(output_string)
         # then send to slack channel: 
-        send_data(output_string)
+        send_data(output_string, slack_webhook)
     else:
         print(output_string)
