@@ -1,4 +1,4 @@
-# The code base for defining functions for data validation of client dashboards
+# The code base for defining functions for data validation of client dashboards --
 
 # import required packages
 from pyathena import connect
