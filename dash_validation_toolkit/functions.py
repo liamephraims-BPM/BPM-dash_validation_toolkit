@@ -235,7 +235,7 @@ def check_2_3(target, targetdbs, target_PK, connection):
     print("Check 2.3 (unique PKs): ",dup_keys ==0, target, dup_keys)
     
     # return whether this test is true - passed - or false - failed for not containing any duplicate primary keys/primary keys are unique
-    return dup_keys ==0, f"{dup_keys ==0} {target} {dup_keys} {target_PK} {targetdbs}"
+    return dup_keys ==0, f"{dup_keys ==0} {target} {dup_keys} {target_PK} {targetdbs} { len(list(base_query["PK_base"])) }"
 
 #check_dictionary["2.3"] = check_2_3
 
@@ -358,7 +358,7 @@ def check_3_2(dashboard_statistic, base_statistic_query, dash_table, dash_databa
 
     # check that the base statistic query is equal to the sumed base dashboard statistic (check 3.2) 
     #    AND if is a multiple pathway that select all == sum of individual pathways in dashboard table alone (check 3.1)
-    return (base_statistic==dash_statistic) and (check3_1 == True), f"{base_statistic==dash_statistic} {base_statistic,dash_statistic} {dash_table} {dashboard_statistic}"
+    return (base_statistic==dash_statistic) and (check3_1 == True), f"{base_statistic==dash_statistic} {base_statistic,dash_statistic} {dash_table} {dashboard_statistic} check3_1 (select all == base sum: {check3_1}"
 
     ######################### Check 3.3 definition - Check 3 for stage 3 Dashboard checks - checking cumulative  statistics   ############################################################################
 def check_3_3(cumulative_dash_query, base_dash_query, regions, cumulative_dash_statistic, connection):
