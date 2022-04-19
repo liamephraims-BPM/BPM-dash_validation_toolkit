@@ -293,9 +293,9 @@ def check_3_1(pathway_set, pathways, dashboard_stat, connection):
         pathway_total = pathway_total + pathway_sum
 
     # confirming that select all == (all pathway sums added together)
-    print('Check 3.1 (select all == pathway sum):', select_all_total == pathway_total, dashboard_stat)
+    print('Check 3.1 (select all == pathway sum):', select_all_total == pathway_total, dashboard_stat, select_all_total,  pathway_total)
     
-    return select_all_total == pathway_total, f"{select_all_total == pathway_total} {dashboard_stat}"
+    return select_all_total == pathway_total, f"{select_all_total == pathway_total} {dashboard_stat} {select_all_total} {pathway_total}"
 
 
 ######################### Check 3.2 definition - Check 2 for stage 3 Dashboard checks - checking NON-cumulative & NON-onboard user dashboard statistics & check 3.1  ############################################################################
@@ -375,12 +375,12 @@ def check_3_3(cumulative_dash_query, base_dash_query, regions, cumulative_dash_s
     base_cnt = base_dash_read['count'][0]
     
     # checking result var
-    check_bool = bool(cum_sum != base_cnt)
+    check_bool = bool(cum_sum == base_cnt)
 
     # completing check for 3.3, if any failures in pathway+region cumulative totals not adding up  or the overall select all not adding up to base query then inconsistency in cumualtive:
-    print("Check 3.3 (select all == cumulative total): ", check_bool == 0,base_cnt, cum_sum, cumulative_dash_statistic)
+    print("Check 3.3 (select all == cumulative total): ", check_bool == 1,base_cnt, cum_sum, cumulative_dash_statistic)
 	
-    return check_bool, f"{check_bool == 0} {base_cnt} {cum_sum} {cumulative_dash_statistic}"
+    return check_bool, f"{check_bool == 1} {base_cnt} {cum_sum} {cumulative_dash_statistic}"
     
     
 
