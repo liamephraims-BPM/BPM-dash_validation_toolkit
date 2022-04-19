@@ -26,7 +26,7 @@ def send_data(text, slack_webhook):
     print(res.text)
     
 # Creating utility function for outputting all the client failures and warnings:
-def output_client_validation_results(clients, send_to_slack=True, slack_webhook):
+def output_client_validation_results(clients, slack_webhook, send_to_slack=True):
     """
         Print out the warnings/errors from the validation, and if send to slack parameter is not false, then also send to analytics slack channel
     """
