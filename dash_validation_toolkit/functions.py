@@ -358,7 +358,7 @@ def check_3_2(dashboard_statistic, base_statistic_query, dash_table, dash_databa
 
     # check that the base statistic query is equal to the sumed base dashboard statistic (check 3.2) 
     #    AND if is a multiple pathway that select all == sum of individual pathways in dashboard table alone (check 3.1)
-    return (base_statistic==dash_statistic) and (check3_1 == True), f"{base_statistic==dash_statistic} {base_statistic,dash_statistic} {dash_table} {dashboard_statistic}"
+    return (base_statistic==dash_statistic) and (check3_1[0] == True), f"{base_statistic==dash_statistic} {base_statistic,dash_statistic} {dash_table} {dashboard_statistic}"
 
     ######################### Check 3.3 definition - Check 3 for stage 3 Dashboard checks - checking cumulative  statistics   ############################################################################
 def check_3_3(cumulative_dash_query, base_dash_query, regions, cumulative_dash_statistic, connection):
@@ -420,7 +420,7 @@ def check_3_4(dashboard_statistic, dash_database, dash_table, base_statistic_que
     print("Check 3.4 (onboard stat dash->base same): ", (base_statistic == random_pathway_count and paths_equal_bool == True), dashboard_statistic)
     
     # Now having confirmed that all pathway counts are the same for this statistic, making sure that one of them is equal to the base table query for this statistic
-    return base_statistic == random_pathway_count and paths_equal_bool == True, f"{base_statistic == random_pathway_count and paths_equal_bool == True} {dashboard_statistic}"
+    return base_statistic == random_pathway_count and paths_equal_bool == True, f"{base_statistic == random_pathway_count and paths_equal_bool == True} {dashboard_statistic} {random_pathway_count} {base_statistic} {pathway_total_sum / no_pathways}"
 
     ######################### Check 3.5 definition - Check 3 for stage 3 Dashboard checks - checking onboard (single-level pathway)  statistics  -where sum would not work over multiple pathways ############################################################################
 
