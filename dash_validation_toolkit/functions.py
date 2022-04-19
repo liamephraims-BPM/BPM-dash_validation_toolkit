@@ -213,7 +213,6 @@ def check_2_3(target, targetdbs, target_PK, connection):
 	 Output:
 	       bool - True/False - 1/0
      Comments:
-
     """
         # check if PK is a composite PK so a list, if so need to concat into correct format- otherwise leave as single column string:
     if type(target_PK) == list:
@@ -461,7 +460,8 @@ def check_3_6(dash_query_1, dash_query_2,dash_test_name, logical_comparion_opera
     # outputting result of comparison
     print(f"Check 3.6 (within-dash check-{dash_test_name}): ", eval("{} {} {}".format(dash1_query_result, logical_comparion_operator,dash2_query_result)), dash2_query_result, dash1_query_result)
     # returning whether dash comparison check was passed: NOTE: this will evaluate the string as a logical expression - allowing for the logic operator to be dynamic
-    return eval("{} {} {}".format(dash1_query_result, logical_comparion_operator,dash2_query_result)), f"{eval("{} {} {}".format(dash1_query_result, logical_comparion_operator,dash2_query_result))} {dash1_query_result} {logical_comparion_operator} {dash2_query_result}"
+    output = eval("{} {} {}".format(dash1_query_result, logical_comparion_operator,dash2_query_result))
+    return eval("{} {} {}".format(dash1_query_result, logical_comparion_operator,dash2_query_result)), f"{output} {dash1_query_result} {logical_comparion_operator} {dash2_query_result}"
 
 
 ## DEFINING DRIVER FUNCTIONS - STAGE ONE
@@ -638,14 +638,14 @@ def stage_2_driver(primary_parents, clients, validation_client, definition_check
         else:
               if table  in clients[validation_client].failures:
                     #then already in clients[validation_client]  - add additional failure
-                    clients[validation_client].failures[table].failures["2.3"] = "WARNING: Check 2.1, 2.2, 2.3 - Table {} has not been checked"\n".format(table)
+                    clients[validation_client].failures[table].failures["2.3"] = "WARNING: Check 2.1, 2.2, 2.3 - Table {} has not been checked\n".format(table)
               else:
                     # then table has not failed a check, add to client object and add first failure:
                     failed_table = node(table, clients[validation_client].client , clients[validation_client].client + "_base_tables", [] )
                     clients[validation_client].failures[table] = failed_table
-                    clients[validation_client].failures[table].failures["2.3"] = "WARNING: Check 2.1, 2.2, 2.3 - Table {} has not been checked for stage two checks"\n".format(table)
+                    clients[validation_client].failures[table].failures["2.3"] = "WARNING: Check 2.1, 2.2, 2.3 - Table {} has not been checked for stage two checks\n".format(table)
 	
-	      print(table, " has not been checked")    
+              print(table, " has not been checked")    
 ############################ Check 2.4: Checking that defintion look-up tables are up-to-date ###########################################################   - NOTE: this will be done twice in loop, would be good to imrpove on this
     # Checking if for this base table, if there is a definition/look-up table associated with it which needs to be checked
 
@@ -804,4 +804,3 @@ def stage_3_driver(dash_to_base_query_dictionary, clients, cumulative_check_dict
                 clients[validation_client].failures[dashboard_table] = failed_table
                 clients[validation_client].failures[dashboard_table].failures["3.6." +  str(counter)] = "FAILURE: Check 3.6: - in-dashboard comparison logic check failed  - {} - values: {}\n".format(dashboard_comparison_name, check6[1])
     return clients
-
