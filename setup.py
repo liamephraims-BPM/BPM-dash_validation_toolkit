@@ -4,7 +4,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name='dash_validation_toolkit',
+    name='BPM-dash_validation_toolkit',
     version='0.19.01',
     author='Liam Ephraims',
     author_email='liam.ephraims@bigpicturemedical.com',
