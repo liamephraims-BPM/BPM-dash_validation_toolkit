@@ -4,7 +4,7 @@ BPM_dash_validation_toolkit is a Python package for our bpm analytics team. It p
 
 Use the package manager pip to install Toolbox like below. Rerun this command to check for and install updates (will check versioning so make sure to update this when editing).
 
-pip install git+https://github.com/Liamephraims/dash_validation_toolkit  --this will be changed once package is moved into our repo
+pip install git+https://github.com/liamephraims-BPM/BPM_dash_validation_toolkit  --this will be changed once package is moved into our repo
 
 Functions available to import: 
 
