@@ -1,10 +1,18 @@
 BPM_dash_validation_toolkit
 
+Each new version (change in functions etc) to bring this into AWS jobs, we will need to:
+  1. Increment the setup.py version by 1.
+  2. Recreate the wheel file for package. For this:
+  3. Run pip install wheels
+  4. Delete old wheel files/folders 
+  5. Run python setup.py bdist_wheel
+  6. Add this new wheel file to our S3 Bucket which is pointed to by our glue jobs
+
 BPM_dash_validation_toolkit is a Python package for our bpm analytics team. It provides functionality to undertake checks for stage one (region source to union), stage two (union to base) and stage three (base to dashboard) checks, and allows us to maintain our validation code for each client on more simply validation template scripts which can easily be added to when needed. If you want to add a new check, add it to the functions.py script, and init/imports script and it can be used (also increment the version of the package in settings 'setup' file. 
 
 Use the package manager pip to install Toolbox like below. Rerun this command to check for and install updates (will check versioning so make sure to update this when editing).
 
-pip install git+https://github.com/liamephraims-BPM/BPM_dash_validation_toolkit  --this will be changed once package is moved into our repo
+pip install git+https://github.com/liamephraims-BPM/BPM_dash_validation_toolkit  
 
 Functions available to import: 
 
