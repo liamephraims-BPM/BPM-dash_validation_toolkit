@@ -11,8 +11,8 @@ setuptools.setup(
     description='Use driver functions and utility functions to run stage 1, 2 and 3 checks, can also run individual checks',
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url='https://github.com/Liamephraims/dash_validation_toolkit',
+    url='https://github.com/liamephraims-BPM/BPM-dash_validation_toolkit',
     license='MIT',
-    packages=['dash_validation_toolkit'],
+    packages=['BPM-dash_validation_toolkit'],
     install_requires=['pyathena', 'pandas'] #, 
 )
