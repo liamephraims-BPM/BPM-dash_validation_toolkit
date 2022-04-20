@@ -282,7 +282,8 @@ def check_3_1(pathway_set, pathways, dashboard_stat, connection):
 
     # sum variable for capturing aggregated sum of pathways
     pathway_total = 0
-
+    pathway_counts = list()
+    pathway_counts.append( (list(pathways[pathways["pathway_name"] == "Select all"]["{}".format(dashboard_stat)])[0],  "Select all") )
     # remove select all from pathway_set, so only non-select all pathways:
     pathway_set.remove("Select all")
 
@@ -291,11 +292,12 @@ def check_3_1(pathway_set, pathways, dashboard_stat, connection):
         pathway_sum = list(pathways[pathways["pathway_name"] == pathway]["{}".format(dashboard_stat)])[0]
         # Incrementing pathway total
         pathway_total = pathway_total + pathway_sum
+        pathway_counts.append((pathway_sum, pathway))
 
     # confirming that select all == (all pathway sums added together)
     print('Check 3.1 (select all == pathway sum):', select_all_total == pathway_total, dashboard_stat, select_all_total,  pathway_total)
     
-    return select_all_total == pathway_total
+    return select_all_total == pathway_total, f" {select_all_total} == {pathway_total}, {dashboard_stat}, {select_all_total},  {pathway_total} {pathway_counts}"
 
 
 ######################### Check 3.2 definition - Check 2 for stage 3 Dashboard checks - checking NON-cumulative & NON-onboard user dashboard statistics & check 3.1  ############################################################################
@@ -315,7 +317,7 @@ def check_3_2(dashboard_statistic, base_statistic_query, dash_table, dash_databa
     #  getting all pathways for this dashboard statistic:
 
     # creating defaiult bool for check1
-    check3_1 = True
+    check3_1 = True, f""
 
     # checking if pathway_name column:
     pathway_check = pd.read_sql(
@@ -358,9 +360,9 @@ def check_3_2(dashboard_statistic, base_statistic_query, dash_table, dash_databa
 
     # check that the base statistic query is equal to the sumed base dashboard statistic (check 3.2) 
     #    AND if is a multiple pathway that select all == sum of individual pathways in dashboard table alone (check 3.1)
-    return (base_statistic==dash_statistic) and (check3_1 == True), f"{base_statistic==dash_statistic} {base_statistic,dash_statistic} {dash_table} {dashboard_statistic} check3_1 (select all == base sum: {check3_1}"
-
+    return (base_statistic==dash_statistic) and (check3_1[0] == True), f" check3_1: {check3_1[0]} {check3_1[1]} | check3_2:  {base_statistic==dash_statistic} {base_statistic,dash_statistic} {dash_table} {dashboard_statistic} "
     ######################### Check 3.3 definition - Check 3 for stage 3 Dashboard checks - checking cumulative  statistics   ############################################################################
+
 def check_3_3(cumulative_dash_query, base_dash_query, regions, cumulative_dash_statistic, connection):
     """ Utility function to test that for the cumulative table, if select all than this is equal the overall base statistic total - query should be by country summed   """
     
@@ -712,12 +714,12 @@ def stage_3_driver(dash_to_base_query_dictionary, clients, cumulative_check_dict
 
             if dashboard_table  in clients[validation_client].failures:
             #then already in clients  - add additional failure
-                clients[validation_client].failures[dashboard_table].failures["3.1." + str(counter)] = "FAILURE: Check 3.1 - Dashboard Table {}: - Dashboard statistic {} sum is inconsistent with derived base table statistic sum - values: {} \n".format(dashboard_table, statistic, check1[1])
+                clients[validation_client].failures[dashboard_table].failures["3.1 & 3.2" + str(counter)] = "FAILURE: Check 3.1 and 3.2 - Dashboard Table {}: - Dashboard statistic {} sum is inconsistent with derived base table statistic sum - values: {} \n".format(dashboard_table, statistic, check1[1])
             else:
                 # then dashboard_table has not failed a check, add to client object and add first failure:
                 failed_table = node(dashboard_table, clients[validation_client].client , clients[validation_client].client + "_dashboard_tables", [] )
                 clients[validation_client].failures[dashboard_table] = failed_table
-                clients[validation_client].failures[dashboard_table].failures["3.1." +  str(counter)] = "FAILURE: Check 3.1 - Dashboard Table {}: - Dashboard statistic {} sum is inconsistent with derived base table statistic sum - values: {} \n".format(dashboard_table, statistic, check1[1])
+                clients[validation_client].failures[dashboard_table].failures["3.1 & 3.2" +  str(counter)] = "FAILURE: Check 3.1 and 3.2 - Dashboard Table {}: - Dashboard statistic {} sum is inconsistent with derived base table statistic sum - values: {} \n".format(dashboard_table, statistic, check1[1])
 
     counter = 0
     # For each cumulative statistic in dashboard:
