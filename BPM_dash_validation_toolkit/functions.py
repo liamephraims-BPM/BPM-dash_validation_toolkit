@@ -410,19 +410,33 @@ def check_3_4(dashboard_statistic, dash_database, dash_table, base_statistic_que
     pathway_total_sum = sum(pathway_sum_list)
     # no. of pathways
     no_pathways = len(pathway_set)
-
-    # count for a randomly selected pathway:
-    random_pathway_count = list(pathways[pathways["pathway_name"] == pathway_set.pop()]["{}".format(dashboard_statistic)])[0]
-    # bool for checking if all pathways are equal value across pathways, including select all
-    paths_equal_bool = pathway_total_sum / no_pathways == random_pathway_count
+    # default bool for updating if a false level comparison with base statistic:
+    pathway_bool = True
+        
     # now getting the base query total to make sure this is also the same 
     base_statistic = pd.read_sql(base_statistic_query, connection)
     base_statistic = list(base_statistic["_col0"])[0]
     
+    # list for recording the counts of each level for later printing
+    random_pathway_counts = list()
+    
+    # for each pathway, pop and make sure is same sum as the base: break if either there is a false or empty stack:
+    while len(pathway_set) > 0 and pathway_bool != False:
+        # taking a pathway name from the set and getting the count to compare against base statistic
+        popped_pathway = pathway_set.pop()
+        random_pathway_count = list(pathways[pathways["pathway_name"] == popped_pathway]["{}".format(dashboard_statistic)])[0]
+        # add count to list for later printing in check output
+        random_pathway_counts.append((popped_pathway, random_pathway_count))
+        # comparing against base statistic and updating the pathway_bool (if false then will update otherwise will remain true)
+        pathway_bool = (random_pathway_count == base_statistic)
+
+    # bool for checking if all pathways are equal value across pathways, including select all and equal to the base statistic
+    paths_equal_bool = pathway_total_sum / no_pathways == base_statistic
+    
     print("Check 3.4 (onboard stat dash->base same): ", (base_statistic == random_pathway_count and paths_equal_bool == True), dashboard_statistic)
     
     # Now having confirmed that all pathway counts are the same for this statistic, making sure that one of them is equal to the base table query for this statistic
-    return base_statistic == random_pathway_count and paths_equal_bool == True, f"{base_statistic == random_pathway_count and paths_equal_bool == True} {dashboard_statistic} {random_pathway_count} {base_statistic} {pathway_total_sum / no_pathways}"
+    return pathway_bool == True and paths_equal_bool == True, f"{pathway_bool == True and paths_equal_bool == True} {dashboard_statistic} {random_pathway_counts} {base_statistic} {pathway_total_sum / no_pathways}"
 
     ######################### Check 3.5 definition - Check 3 for stage 3 Dashboard checks - checking onboard (single-level pathway)  statistics  -where sum would not work over multiple pathways ############################################################################
 
@@ -761,12 +775,12 @@ def stage_3_driver(dash_to_base_query_dictionary, clients, cumulative_check_dict
 
             if dashboard_table  in clients[validation_client].failures:
             #then already in clients  - add additional failure
-                clients[validation_client].failures[dashboard_table].failures["3.4." +  str(counter)] = "FAILURE: Check 3.4 - Dashboard Table {}: - Dashboard onboard statistic {}  is inconsistent across levels with derived base table statistic sum - values: {}\n".format(dashboard_table, cumulative_statistic, check4[1] )
+                clients[validation_client].failures[dashboard_table].failures["3.4." +  str(counter)] = "FAILURE: Check 3.4 - Dashboard Table {}: - Dashboard onboard statistic {}  is inconsistent across levels with derived base table statistic sum - values: {}\n".format(dashboard_table, onboard_statistic, check4[1] )
             else:
                 # then dashboard_table has not failed a check, add to client object and add first failure:
                 failed_table = node(dashboard_table, clients[validation_client].client , clients[validation_client].client + "_dashboard_tables", [] )
                 clients[validation_client].failures[dashboard_table] = failed_table
-                clients[validation_client].failures[dashboard_table].failures["3.4." +  str(counter)] = "FAILURE: Check 3.4 - Dashboard Table {}: - Dashboard onboard statistic {}  is inconsistent across levels with derived base table statistic sum - values: {}\n".format(dashboard_table, cumulative_statistic, check4[1] )
+                clients[validation_client].failures[dashboard_table].failures["3.4." +  str(counter)] = "FAILURE: Check 3.4 - Dashboard Table {}: - Dashboard onboard statistic {}  is inconsistent across levels with derived base table statistic sum - values: {}\n".format(dashboard_table, onboard_statistic, check4[1] )
 
     counter = 0
     # For each business logic check for dashboard:
