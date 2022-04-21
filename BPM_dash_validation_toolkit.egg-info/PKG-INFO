@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: BPM-dash-validation-toolkit
-Version: 0.24.1
+Version: 0.25.1
 Summary: Use driver functions and utility functions to run stage 1, 2 and 3 checks, can also run individual checks
 Home-page: https://github.com/liamephraims-BPM/BPM_dash_validation_toolkit
 Author: Liam Ephraims
