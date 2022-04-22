@@ -270,6 +270,28 @@ def check_2_4(definition, look_up_database, look_up_table, look_up_column, conne
         # Checking that after excluding all definition values that do not fit the definition, that there are no news one which have been missed from the base defintion look-up table
         return len(base_set)==0, f"{len(base_set)==0} - current missing/uncategorised ({definition}) definition values for column ({look_up_column}) in database ({look_up_table}) are: {base_set}"
 
+######################### Check 2.5 definition - a warning check function for tracking the number of a particular object - e.g. no. null countries for orgs   ############################################################################
+
+def check_2_5(tracking_name, tracking_query, expected_result, connection):
+        """ Utility function for check 2.5, a function for tracking a query output on the base tables (though could be from any table/database) (e.g. number of null countries) whereby output should be none.
+                Inputs:
+                    tracking_name = a string of the name of the this being tracked for warning print out - e.g. no. orgs with null country
+                    tracking_query = the query to get the count of thing being tracked
+                    expected_result = integer: what the number of this tracked thing should be - e.g. 0 orgs with null country
+                    connection: the athena aws connection object
+                Output:
+                    bool - True/False - 1/0
+        """
+        # run the tracking query - this needs to result in a count, with the final select being named as count
+        tracked_output = pd.read_sql(tracking_query ,connection)
+        # pulling out the count of tracked thing as an integer for comparison
+        tracked_output = tracked_output['count'][0]
+        
+        # Checking tracked output against the expected output:
+        check_bool = tracked_output == expected_result
+        
+        return check_bool, f"Check 2.5: {check_bool} | tracked object: {tracking_name} | tracked no. : {tracked_output} | expected no.: {expected_result} "
+        
 
 ## DEFINING STAGE THREE FUNCTIONS:
 ######################### Check 3.1 definition - Check 1 for stage 3 Dashboard checks - check that if multiple pathways for a dashboard statistic, 
@@ -579,7 +601,7 @@ def stage_1_driver(clients, validation_client, connection):
                     clients[validation_client].failures[table].failures["1.2"] = "FAILURE: Check 1.2 - Table {}: has null region values for region column in union table - values: {}\n".format(table, check2[0])
     return clients
 
-def stage_2_driver(primary_parents, clients, validation_client, definition_check_dictionary, connection):
+def stage_2_driver(primary_parents, clients, validation_client, definition_check_dictionary, track_check_dict, connection):
     """
     Driver function for running the stage 2 checks above for a client
     Inputs:
@@ -714,6 +736,27 @@ def stage_2_driver(primary_parents, clients, validation_client, definition_check
                     failed_table = node(definition, clients[validation_client].client , clients[validation_client].client + "_base_tables", [] )
                     clients[validation_client].failures[definition] = failed_table
                     clients[validation_client].failures[definition].failures["2.4"] = "WARNING: Check 2.4 - Definition {} - new definition value missing from definition look-up table - values {} \n".format(definition, check4[1])
+    check5 = True
+    
+    # checking if any definitions in check dictionary:
+    if len(track_check_dict) > 0:
+	# then complete check for definition:
+    	for tracked_object in track_check_dict:
+	        # unpacking variables for checking over tracked objects in check 2.5
+            tracked_object_query, expected_output  =   track_check_dict[tracked_object]
+		    # run check5
+            check5 = check_2_5(tracked_object, tracked_object_query, expected_output, connection)
+            if check5[0] == False:
+			#Then Check 2.5 has failed for this definition - create a node (if not already created for this table) and add its failure
+			# adding to this overall client object:
+                if tracked_object in clients[validation_client].failures:
+                    #then already in clients[validation_client]  - add additional failure
+                    clients[validation_client].failures[tracked_object].failures["2.5"] = "WARNING: Check 2.5 - Tracked metric {} - Tracked metric not expected value - values: {}\n".format(tracked_object, check5[1])
+                else:
+                    # then track has not failed a check, add to client object and add first failure:
+                    failed_table = node(tracked_object, clients[validation_client].client , clients[validation_client].client + "_base_tables", [] )
+                    clients[validation_client].failures[tracked_object] = failed_table
+                    clients[validation_client].failures[tracked_object].failures["2.5"] = "WARNING: Check 2.5 - Tracked metric {} - Tracked metric not expected value - values {} \n".format(tracked_object, check5[1])
 
 
     return clients
