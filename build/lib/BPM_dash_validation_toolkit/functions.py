@@ -3,6 +3,7 @@
 # import required packages
 from pyathena import connect
 import pandas as pd
+import itertools
 
 ## Defining node class for failures/warnings:
 # Creating node object for passing warnings, dependencies & failures
@@ -274,7 +275,7 @@ def check_2_4(definition, look_up_database, look_up_table, look_up_column, conne
 ######################### Check 3.1 definition - Check 1 for stage 3 Dashboard checks - check that if multiple pathways for a dashboard statistic, 
 #                                   then make sure select all == sum of individual pathways in dashboard table alone - e.g. menicon ############################################################################
 
-def check_3_1(pathway_set, pathways, dashboard_stat, connection):
+def check_3_1(pathway_set, pathways, dashboard_stat, base_PK_by_pathways, connection):
     """ Utility function for undertaking check 3.2, checks that select all == individual pathway sums"""
 
     # get the select all total:
@@ -294,18 +295,42 @@ def check_3_1(pathway_set, pathways, dashboard_stat, connection):
         pathway_total = pathway_total + pathway_sum
         pathway_counts.append((pathway_sum, pathway))
 
+    # If for this dash statistic, there is a possibility of a single entity - e.g. patient - being over mutiple pathways and being counted twice
+    # then we need to minus from the pathway total (pathways added together - not select all) - we do this by minusing the number of ids shared on a pair of pathways:
+    #1. check if there is possiblity of this:
+            
+    # record no intersections (e.g. same patients on diff pathways) to be minuses from select all at end
+    no_intersections = 0
+    
+    if base_PK_by_pathways != []:
+        # then read in base_PK_by_pathways and this is a statstic we need to account for multiple ids between pathways - to avoid being counted twice against select all
+        base_PK_by_pathways = pd.read_sql(base_PK_by_pathways,connection)
+
+        # for each pathway get the set of unique base ids
+        pathway_dict = dict()
+        base_id = base_PK_by_pathways.columns[0] # CONSTRAINT: getting the base id - must be PK id of query given by user
+        for pathway in set(base_PK_by_pathways["pathway_name"]):
+            pathway_dict[pathway] = set(base_PK_by_pathways[base_PK_by_pathways.pathway_name == pathway][base_id])
+
+        # for each distinct permutation - possible pair of pathways - to see if any same e.g. patient on a pathway (to avoid being counted twice) - check for intersection and add to count 
+        pathway_permutations = list(itertools.combinations((set(base_PK_by_pathways["pathway_name"])), 2))
+        # for each element i of the list of distinct possible pathway combinations, get the number of intersections (e.g. same patients over two pathways) and sum this number
+        no_intersections = sum(list(map(lambda i: len(pathway_dict[i[0]].intersection(pathway_dict[i[1]])) ,  pathway_permutations)))
+    
+        # now we have number of entities (e.g. patients) which are on multiple pathway pairs we can factor this into our pathway total for comparison against select all
+        pathway_total = pathway_total - no_intersections 
+    
     # confirming that select all == (all pathway sums added together)
     print('Check 3.1 (select all == pathway sum):', select_all_total == pathway_total, dashboard_stat, select_all_total,  pathway_total)
     
-    return select_all_total == pathway_total, f" {select_all_total} == {pathway_total}, {dashboard_stat}, {select_all_total},  {pathway_total} {pathway_counts}"
-
+    return select_all_total == pathway_total, f" {select_all_total} == {pathway_total}, {select_all_total},  {pathway_total} {pathway_counts} {dashboard_stat} over multiple pathways accounted for {no_intersections}"
 
 ######################### Check 3.2 definition - Check 2 for stage 3 Dashboard checks - checking NON-cumulative & NON-onboard user dashboard statistics & check 3.1  ############################################################################
 
 # in future, should add in method for inference of schema from each script for prod, union, base table, end-point tables
 # and matching of primary keys together
 
-def check_3_2(dashboard_statistic, base_statistic_query, dash_table, dash_database, connection):
+def check_3_2(dashboard_statistic, base_statistic_query, dash_table, dash_database, base_PK_by_pathways, connection):
     """ Utility function for undertaking check 3.2, checks that a dashboard statistic in end-point dashboard table has the same sum as when calculated 
     directly off the relevant base tables and checks that check 3.1 is true"""
     # Calculating the sum for the dashboard statistic
@@ -346,7 +371,7 @@ def check_3_2(dashboard_statistic, base_statistic_query, dash_table, dash_databa
             dash_statistic_query = dash_statistic_query + " WHERE pathway_name = 'Select all'"
 
             # furthermore, knowing that this is a multiple pathway, need to check that the pathways underlying the select all are also correct, so completeing a nested check for this
-            check3_1 = check_3_1(pathway_set, pathways, dashboard_statistic, connection) 
+            check3_1 = check_3_1(pathway_set, pathways, dashboard_statistic, base_PK_by_pathways,connection) 
 
     dash_statistic = pd.read_sql(dash_statistic_query, connection)
     dash_statistic = list(dash_statistic["_col0"])[0]
@@ -361,6 +386,7 @@ def check_3_2(dashboard_statistic, base_statistic_query, dash_table, dash_databa
     # check that the base statistic query is equal to the sumed base dashboard statistic (check 3.2) 
     #    AND if is a multiple pathway that select all == sum of individual pathways in dashboard table alone (check 3.1)
     return (base_statistic==dash_statistic) and (check3_1[0] == True), f" check3_1: {check3_1[0]} {check3_1[1]} | check3_2:  {base_statistic==dash_statistic} {base_statistic,dash_statistic} {dash_table} {dashboard_statistic} "
+    
     ######################### Check 3.3 definition - Check 3 for stage 3 Dashboard checks - checking cumulative  statistics   ############################################################################
 
 def check_3_3(cumulative_dash_query, base_dash_query, regions, cumulative_dash_statistic, connection):
@@ -717,7 +743,7 @@ def stage_3_driver(dash_to_base_query_dictionary, clients, cumulative_check_dict
 
         #################################### Check 3.1: Check each statisic sum is same in base table ###########################################################
 
-        check1 = check_3_2(dashboard_statistic=statistic, base_statistic_query=dash_to_base_query_dictionary[statistic][1], dash_table=dashboard_table, dash_database=clients[validation_client].client + "_dashboard_tables", connection=connection)
+        check1 = check_3_2(dashboard_statistic=statistic, base_statistic_query=dash_to_base_query_dictionary[statistic][1], dash_table=dashboard_table, dash_database=clients[validation_client].client + "_dashboard_tables", base_PK_by_pathways=dash_to_base_query_dictionary[statistic][2], connection=connection)
 
         # Adding failures from checks of stage 1 to client object:
         if check1[0] == False:
