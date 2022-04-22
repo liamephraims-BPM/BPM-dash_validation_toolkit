@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name='BPM_dash_validation_toolkit',
-    version='0.25.01',
+    version='0.26.01',
     author='Liam Ephraims',
     author_email='liam.ephraims@bigpicturemedical.com',
     description='Use driver functions and utility functions to run stage 1, 2 and 3 checks, can also run individual checks',
