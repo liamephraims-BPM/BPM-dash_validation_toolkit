@@ -1,13 +1,12 @@
 BPM_dash_validation_toolkit
 
 Each new version (change in functions etc) to bring this into AWS jobs, we will need to:
-  1. Increment the setup.py version parameter by 1.
-  2. Recreate the wheel file for package in dist folder. For this:
-  3.  Run pip install wheels (if not already installed-this will allow you to run python setup.py bdist_wheel to create the wheel file for the package)
-  4.  Delete old wheel files/folders (BPM_dash_validation_toolkit.egg-info, build, dist)
-  5.  Run python setup.py bdist_wheel - this will recreate BPM_dash_validation_toolkit.egg-info, build, dist folders, with package wheel file in dist folder note: the name will have changed for this file for the version section (e.g. BPM_dash_validation_toolkit-0.23.1-py3-none-any.whl -> BPM_dash_validation_toolkit-0.24 1-py3-none-any.whl), so later steps this naming of file will need to be updated - e.g. referencing file from s3 bucket for github actions - in assigning this package to a glue job.
-  6. Add this new wheel file in the dist folder to our S3 Bucket which is pointed to by our glue jobs in github actions
-  7. Change the name of the BPM validation toolkit wheel file name in the github action named external pushes as the version number will have changed in the file name. 
+  1. Recreate the wheel file for package in dist folder. For this:
+  2.  Run pip install wheels (if not already installed-this will allow you to run python setup.py bdist_wheel to create the wheel file for the package)
+  3.  Delete old wheel files/folders (BPM_dash_validation_toolkit.egg-info, build, dist)
+  4.  Run python setup.py bdist_wheel - this will recreate BPM_dash_validation_toolkit.egg-info, build, dist folders, with package wheel file in dist folder note: the name will have changed if you changed the version index for this file for the version section (e.g. BPM_dash_validation_toolkit-0.23.1-py3-none-any.whl -> BPM_dash_validation_toolkit-0.24 1-py3-none-any.whl), so later steps this naming of file will need to be updated in github actions if version was changed - e.g. referencing file from s3 bucket for github actions (if not then skip this step) - in assigning this package to a glue job.
+  5. Add this new wheel file in the dist folder to our S3 Bucket which is pointed to by our glue jobs in github actions (add this as future github actions job)
+  6. Change the name of the BPM validation toolkit wheel file name in the github action named external pushes if the version number was changed. 
 
 BPM_dash_validation_toolkit is a Python package for our bpm analytics team. It provides functionality to undertake checks for stage one (region source to union), stage two (union to base) and stage three (base to dashboard) checks, and allows us to maintain our validation code for each client on more simply validation template scripts which can easily be added to when needed. If you want to add a new check, add it to the functions.py script, and init/imports script and it can be used (also increment the version of the package in settings 'setup' file. 
 
